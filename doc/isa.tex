@@ -1,0 +1,382 @@
+% SPDX-License-Identifier: CC-BY-SA-4.0
+\documentclass[a4paper,12pt]{article}
+
+\usepackage{geometry}
+\geometry{margin=1in}
+
+\usepackage{array}
+\usepackage{booktabs}
+\usepackage[hidelinks]{hyperref}
+\usepackage{fontspec}
+\usepackage{listings}
+\usepackage{xcolor}
+\usepackage{fancyhdr}
+\usepackage{tocloft}
+\usepackage{graphicx}
+\usepackage{caption}
+
+\renewcommand{\cftsecleader}{\cftdotfill{1}}
+\renewcommand{\cftsubsecleader}{\cftdotfill{1}}
+\renewcommand{\cftsubsubsecleader}{\cftdotfill{1}}
+\captionsetup{font=small}
+
+\pagestyle{fancy}
+\fancyhf{}
+\renewcommand{\headrulewidth}{0pt}
+\renewcommand{\footrulewidth}{0pt}
+\fancyhead[L]{\nouppercase{\leftmark}}
+\fancyhead[R]{Shark ISA}
+\fancyfoot[C]{\color{white}\thepage}
+
+\setmainfont{Iosevka Fixed}[]
+\setmonofont{Iosevka Fixed}[]
+
+\definecolor{keywordcolor}{RGB}{0,0,180}
+\definecolor{registercolor}{RGB}{128,0,128}
+\definecolor{commentcolor}{RGB}{100,100,100}
+\definecolor{stringcolor}{RGB}{0,120,0}
+\definecolor{codebg}{RGB}{235,235,235}
+\definecolor{primarylbf}{RGB}{22,22,22}
+\definecolor{lbf}{RGB}{23,160,134}
+
+\usepackage{tikz}
+\usepackage{everypage}
+
+\newcommand{\topandbottomcolor}{%
+    \ifnum\value{page}=1
+    \begin{tikzpicture}[remember picture, overlay]
+        \fill[primarylbf] (current page.south west) rectangle ([yshift=2cm] current page.south east);
+    \end{tikzpicture}%
+    \fi
+    \ifnum\value{page}>1
+    \begin{tikzpicture}[remember picture, overlay]
+        \fill[lbf] (current page.north west) rectangle ([yshift=-2cm] current page.north east);
+        \fill[primarylbf] (current page.south west) rectangle ([yshift=2cm] current page.south east);
+    \end{tikzpicture}%
+    \fi
+}
+
+\AddEverypageHook{\topandbottomcolor}
+
+\newcommand{\syntax}[1]{
+  \noindent\textbf{Syntax:} \texttt{#1}\\
+}
+
+\newcommand{\desc}[1]{
+  \noindent\textbf{Description:}\\
+  #1\\
+  \noindent\textbf{Example:}}
+
+\newenvironment{instruction}[2]{
+  \subsubsection{#1}
+  \noindent\textbf{Opcode:} \texttt{#2}\\}{}
+
+\lstdefinelanguage{SharkISA}{
+  morekeywords={ADD,SUB,MOV,LDR,STR,JMP,CALL,RET},
+  morekeywords=[2]{R0,R1,R2,R3,R4,R5,R6,R7,R8,R9,R10,R11,R12,R13,BP,SP},
+  morekeywords=[3]{0,1,2,3,4,5,6,7,8,9},
+  sensitive=false,
+  tabsize=4,
+  columns=fixed,
+  keepspaces=true,
+  morecomment=[l]{;},
+  morestring=[b]{"},
+}
+
+\lstdefinestyle{SharkISAStyle}{
+  language=SharkISA,
+  basicstyle=\ttfamily\normalsize,
+  keywordstyle=\color{keywordcolor}\bfseries,
+  keywordstyle=[2]\color{registercolor},
+  keywordstyle=[3]\color{lbf},
+  commentstyle=\itshape\color{commentcolor},
+  stringstyle=\color{stringcolor},
+  breakatwhitespace=false,
+  numbers=left,
+  numberstyle=\normalsize\color{gray},
+  stepnumber=1,
+  frame=leftline,
+  backgroundcolor=\color{codebg},
+  showstringspaces=false,
+  showspaces=false,
+  numbersep=7pt,
+}
+
+\begin{document}
+
+% TITLE
+\thispagestyle{empty} 
+
+\vspace*{3cm}
+
+\begin{flushright}
+    {\fontsize{50pt}{60pt}\selectfont \textbf{Shark ISA}\\ Specification}
+\end{flushright}
+
+\begin{tikzpicture}
+    \draw[fill=lbf, draw=black!0] (0,0) rectangle (\linewidth,0.3cm);
+\end{tikzpicture}
+
+\vspace{1em}
+
+\begin{flushright}
+    {\Large Version 0.1}\par
+\end{flushright}
+
+\vfill
+
+\begin{flushright}
+    {\large Author: LowByteFox\par}
+\end{flushright}
+
+\begin{flushright}
+    {\large \today\par}
+\end{flushright}
+
+\newpage
+% TOC
+\tableofcontents
+\newpage
+\section{Preamble}
+This document is released under a Creative Commons Attribution-ShareAlike 4.0 International License.
+
+\newpage
+\section{Introduction}
+\textbf{Shark} (a short for "\textbf{S}imple \textbf{H}ardware \textbf{Arc}hitecture") is a simple architecture designed by 
+a C programmer for hobbyist and learning purposes.\\
+\\
+This document describes the Instruction Set Architecture (ISA) for \textbf{Shark}.
+It covers registers, memory model, instruction formats, and the behavior of each instruction.\\
+\\
+The goal is to stay simple, while allowing flexibility for users and staying consistent
+with encoding. The ISA uses fixed 32-bit encoding per instruction, first 8 most significant bits (31-23)
+contains opcode header, the first 6 most significant bits are used for opcode while the rest 2 bits are used
+for opcode "mode bits", which alter the behavior of an instruction decoding and execution.\\
+\\
+Most instructions operate on unsigned values, those that operate on signed values have it stated.
+Each encoded immediate is therefor considered unsigned, those instructions that rely on
+signed values have immediates encoded using Two's Complement representation.\\
+\\
+This ISA supports integers of up most to 32-bits, but support for 64-bit values may become an extension.
+
+\newpage
+\section{Execution Model}
+\begin{itemize}
+  \item Word size: 32-bit
+  \item Endianness: Little-endian
+  \item Addressing: Flat memory model
+  \item Calling convention: [Describe briefly]
+\end{itemize}
+
+\newpage
+\section{Registers}
+\begin{tabular}{@{}lll@{}}
+\toprule
+Name & Description & Width \\
+\midrule
+R0--R13 & General purpose registers & 32-bit \\
+BP      & Base stack pointer        & 32-bit \\
+SP      & Stack pointer             & 32-bit \\
+\bottomrule
+\end{tabular}
+
+\newpage
+\section{Memory Model}
+\begin{itemize}
+  \item Address space: 4 GiB (0x00000000--0xFFFFFFFF)
+  \item Alignment: word-aligned (4 bytes)
+  \item Supported data types: byte (8-bit), half (16-bit), word (32-bit)
+\end{itemize}
+
+\newpage
+\section{Instruction Set}
+Each instruction is defined with its mnemonic, encoding, description, and examples.
+
+\subsection{Arithmetic Instructions}
+Every instruction (unless stated) is handling integers and treating immediates as unsigned,
+these instructions support 3 modes:\\
+\\
+\begin{tabular}{@{}lll@{}}
+\toprule
+Bits & Mode & Description \\
+\midrule
+00 & R-R & Performs operation using 2 registers \\
+01 & R-I & Performs operation using register and immediate \\
+10 & I-R & Performs operation using immediate and register \\
+11 & I-I & Performs operation using 2 immediates \\
+\bottomrule
+\end{tabular}
+\\
+\\
+Encoding is as follows:\\
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=\linewidth]{pdfs/math_00}
+    \caption{Encoding for R-R}
+\end{figure}
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=\linewidth]{pdfs/math_01}
+    \caption{Encoding for R-I}
+\end{figure}
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=\linewidth]{pdfs/math_11}
+    \caption{Encoding for I-I}
+\end{figure}
+\\
+\textbf{Note:}\\
+I-R is encoded the same way as R-I is, however the order of operands is
+swapped
+
+\newpage
+\begin{instruction}{add}{1}
+\syntax{add DST, SRC1, SRC2}
+\desc{Adds inputs SRC1 and SRC2, storing the result in DST.}
+\begin{verbatim}
+add R0, R1, R2   ; R0 = R1 + R2
+add R0, R1, #4   ; R0 = R1 + 4
+add R0, #3, #4   ; R0 = 3 + 4
+\end{verbatim}
+\end{instruction}
+
+\begin{instruction}{sub}{2}
+\syntax{sub DST, SRC1, SRC2}
+\desc{Subtracts SRC2 from SRC1, storing the result in DST.}
+\begin{verbatim}
+sub R0, R1, R2   ; R0 = R1 - R2
+sub R0, R1, #4   ; R0 = R1 - 4
+sub R0, #7, R2   ; R0 = 7 - R2
+sub R0, #7, #4   ; R0 = 7 - 4
+\end{verbatim}
+\end{instruction}
+
+\begin{instruction}{mul}{3}
+\syntax{mul DST, SRC1, SRC2}
+\desc{Multiplies SRC1 with SRC2, storing the result in DST.}
+\begin{verbatim}
+mul R0, R1, R2   ; R0 = R1 * R2
+mul R0, R1, #4   ; R0 = R1 * 4
+mul R0, #7, #4   ; R0 = 7 * 4
+\end{verbatim}
+\end{instruction}
+
+\begin{instruction}{smul}{4}
+\syntax{smul DST, SRC1, SRC2}
+\desc{Signed multiplication of SRC1 with SRC2, storing the result in DST.}
+\begin{verbatim}
+smul R0, R1, R2   ; R0 = R1 * R2
+smul R0, R1, #4   ; R0 = R1 * 4
+smul R0, #7, #4   ; R0 = 7 * 4
+\end{verbatim}
+\end{instruction}
+
+\begin{instruction}{div}{5}
+\syntax{div DST, SRC1, SRC2}
+\desc{Divides SRC1 with SRC2, storing the result in DST.}
+\begin{verbatim}
+div R0, R1, R2   ; R0 = R1 / R2
+div R0, R1, #4   ; R0 = R1 / 4
+div R0, #7, R2   ; R0 = 7 / R2
+div R0, #7, #4   ; R0 = 7 / 4
+\end{verbatim}
+\end{instruction}
+
+\begin{instruction}{sdiv}{6}
+\syntax{sdiv DST, SRC1, SRC2}
+\desc{Signed division of SRC1 with SRC2, storing the result in DST.}
+\begin{verbatim}
+sdiv R0, R1, R2   ; R0 = R1 / R2
+sdiv R0, R1, #4   ; R0 = R1 / 4
+sdiv R0, #7, R2   ; R0 = 7 / R2
+sdiv R0, #7, #4   ; R0 = 7 / 4
+\end{verbatim}
+\end{instruction}
+
+\begin{instruction}{rem}{7}
+\syntax{rem DST, SRC1, SRC2}
+\desc{Divides SRC1 with SRC2, storing the remainder in DST.}
+\begin{verbatim}
+rem R0, R1, R2   ; R0 = R1 % R2
+rem R0, R1, #4   ; R0 = R1 % 4
+rem R0, #7, R2   ; R0 = 7 % R2
+rem R0, #7, #4   ; R0 = 7 % 4
+\end{verbatim}
+\end{instruction}
+
+\begin{instruction}{srem}{8}
+\syntax{srem DST, SRC1, SRC2}
+\desc{Signed division of SRC1 with SRC2, storing the remainder in DST.}
+\begin{verbatim}
+srem R0, R1, R2   ; R0 = R1 % R2
+srem R0, R1, #4   ; R0 = R1 % 4
+srem R0, #7, R2   ; R0 = 7 % R2
+srem R0, #7, #4   ; R0 = 7 % 4
+\end{verbatim}
+\end{instruction}
+
+\begin{instruction}{and}{9}
+\syntax{and DST, SRC1, SRC2}
+\desc{Bitwise and of SRC1 and SRC2, storing the result in DST.}
+\begin{verbatim}
+and R0, R1, R2   ; R0 = R1 & R2
+and R0, R1, #4   ; R0 = R1 & 4
+and R0, #7, #4   ; R0 = 7 & 4
+\end{verbatim}
+\end{instruction}
+
+\begin{instruction}{or}{10}
+\syntax{or DST, SRC1, SRC2}
+\desc{Bitwise or of SRC1 and SRC2, storing the result in DST.}
+\begin{verbatim}
+or R0, R1, R2   ; R0 = R1 | R2
+or R0, R1, #4   ; R0 = R1 | 4
+or R0, #7, #4   ; R0 = 7 | 4
+\end{verbatim}
+\end{instruction}
+
+\begin{instruction}{xor}{11}
+\syntax{xor DST, SRC1, SRC2}
+\desc{Bitwise xor of SRC1 and SRC2, storing the result in DST.}
+\begin{verbatim}
+xor R0, R1, R2   ; R0 = R1 ^ R2
+xor R0, R1, #4   ; R0 = R1 ^ 4
+xor R0, #7, #4   ; R0 = 7 ^ 4
+\end{verbatim}
+\end{instruction}
+
+\newpage
+\section{Encoding Specification}
+\begin{tabular}{@{}ll@{}}
+\toprule
+Bits & Meaning \\
+\midrule
+15--12 & Destination register (Rd) \\
+11--8  & Source register (Rs) \\
+7--4   & Source register (Rt) \\
+3--0   & Opcode \\
+\bottomrule
+\end{tabular}
+
+\newpage
+\section{ABI Conventions}
+\begin{itemize}
+  \item R0--R3: argument registers
+  \item R4--R7: callee-saved registers
+  \item SP: grows downward
+  \item Return value: R0
+\end{itemize}
+
+\newpage
+\section{Examples}
+\subsection{Hello World Loop}
+\begin{lstlisting}[style=SharkISAStyle]
+foo:                  ; emulator pushne ret addr a BP
+  mov BP, SP          ; SP -> BP
+  sub SP, SP, #4      ; SP - 4 -> SP
+  add R0, #3, #4      ; 3 + 4 -> R0
+  str #[BP - 4], R0   ; R0 -> BP - 4
+  ret                 ; BP -> SP, emulator popne BP a ret addr
+\end{lstlisting}
+
+\end{document}

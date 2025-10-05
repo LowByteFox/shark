@@ -1,0 +1,116 @@
+{
+    "math_00": [
+        [6, "opcode"],
+        [2, "bits"],
+        [4, "out reg"],
+        [4, "1st reg"],
+        [4, "2nd reg"],
+        [12, "unused/reserved"]
+    ],
+    "math_01": [
+        [6, "opcode"],
+        [2, "bits"],
+        [4, "out reg"],
+        [4, "1st reg"],
+        [16, "2nd imm"]
+    ],
+    "math_11": [
+        [6, "opcode"],
+        [2, "bits"],
+        [4, "out reg"],
+        [10, "1st imm"],
+        [10, "2nd imm"]
+    ],
+    "store": [
+        [6, "opcode"],
+        [2, "size"],
+        [4, "input"],
+        [4, "addr reg"],
+        [1, "+-"],
+        [15, "imm offset"]
+    ],
+    "load": [
+        [6, "opcode"],
+        [2, "size"],
+        [4, "output"],
+        [4, "addr reg"],
+        [1, "+-"],
+        [15, "imm offset"]
+    ],
+    "jump": [
+        [6, "opcode"],
+        [2, "bitse"],
+        [4, "input"],
+        [1, "+-"],
+        [19, "imm relative offset"]
+    ],
+    "cmp_00": [
+        [6, "opcode"],
+        [2, "bits"],
+        [4, "out reg"],
+        [3, "mode"],
+        [4, "1st reg"],
+        [4, "2nd reg"],
+        [9, "unused/reserved"]
+    ],
+    "cmp_01": [
+        [6, "opcode"],
+        [2, "bits"],
+        [4, "out reg"],
+        [3, "mode"],
+        [4, "1st reg"],
+        [13, "2nd imm"]
+    ],
+    "cmp_11": [
+        [6, "opcode"],
+        [2, "bits"],
+        [4, "out reg"],
+        [3, "mode"],
+        [1, "0"],
+        [8, "1st imm"],
+        [8, "2nd imm"]
+    ],
+    "bit_shift_00": [
+        [6, "opcode"],
+        [2, "bits"],
+        [4, "out reg"],
+        [4, "input reg"],
+        [4, "amount reg"],
+        [12, "unused/reserved"]
+    ],
+    "bit_shift_01": [
+        [6, "opcode"],
+        [2, "bits"],
+        [4, "out reg"],
+        [4, "amount reg"],
+        [16, "input imm"]
+    ],
+    "bit_shift_11": [
+        [6, "opcode"],
+        [2, "bits"],
+        [4, "out reg"],
+        [4, "amount imm"],
+        [16, "input imm"]
+    ],
+    "mov_00": [
+        [6, "opcode"],
+        [2, "bits"],
+        [4, "out reg"],
+        [4, "reg"],
+        [16, "unused"]
+    ],
+    "mov_01": [
+        [6, "opcode"],
+        [2, "bits"],
+        [4, "out reg"],
+        [20, "imm"]
+    ],
+    "mov_11": [
+        [6, "opcode"],
+        [2, "bits"],
+        [4, "out reg"],
+        [4, "addr reg"],
+        [1, "+-"],
+        [15, "imm offset"]
+    ]
+}

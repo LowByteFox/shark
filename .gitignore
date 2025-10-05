@@ -1,0 +1,6 @@
+.cache/
+build/
+common/include/config.h
+doc/venv
+doc/pdfs/*.pdf
+doc/pdfs/done
