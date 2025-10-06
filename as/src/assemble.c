@@ -20,11 +20,10 @@ uint32_t assemble_instruction(struct ir_iter *iter)
     switch (op->kind) {
     case IR_INSTR: {
         enum encoding_type type = get_instr_type(op->label);
-        if (type == INVALID_OPCODE) return INVALID_ASSEMBLY;
+        if (type == XXX_OP) return INVALID_ASSEMBLY;
         return vtable[type](iter, get_instr_opcode(op->label));
     }
     default:
-        /* ! ERR */
         return INVALID_ASSEMBLY;
     }
 }

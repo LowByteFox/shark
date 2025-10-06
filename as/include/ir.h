@@ -15,6 +15,7 @@ enum ir_type {
 
 struct ir_op {
     enum ir_type kind;
+    int offset;
     union {
         struct str label; /* label/instr */
         uint32_t reg; 
@@ -35,6 +36,7 @@ struct ir_iter {
 void ir_init(struct ir_builder *builder);
 
 void ir_emit(struct ir_builder *builder, enum ir_type type);
+void ir_offset(struct ir_builder *builder, int offset);
 void ir_label(struct ir_builder *builder, struct str label);
 void ir_instr(struct ir_builder *builder, struct str label);
 void ir_reg(struct ir_builder *builder, uint32_t reg);

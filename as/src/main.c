@@ -15,7 +15,7 @@ int main()
     uint32_t res;
 
     tokenize(&p, "main:\n"
-                            "  add R0, #1, #1      ; Adds 1 + 1 to R0");
+                            "  add R14, #1, #1      ; Adds 1 + 1 to R0", "<input>");
 
     struct ir_builder ir = parse(&p);
     struct ir_iter i = ir_iter(&ir);
