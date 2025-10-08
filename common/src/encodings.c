@@ -41,3 +41,12 @@ enum encoding_type get_instr_type(const struct str instr)
 
     return XXX_OP;
 }
+
+struct str get_opcode_instr(uint8_t opcode)
+{
+    size_t nul_opcode = sizeof(instrs) / sizeof(instrs[0]) - 1;
+
+    if (opcode >= nul_opcode) return (struct str) { NULL, 0 };
+
+    return str(instrs[opcode]);
+}

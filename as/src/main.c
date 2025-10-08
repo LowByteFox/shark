@@ -13,7 +13,7 @@ int main(int argc, char **argv)
     if (argc != 3)
         die("Expected 3 arguments, got: %d!", argc);
 
-    char *infile = read_entire_file(argv[1]);
+    char *infile = read_entire_file(argv[1], NULL);
     struct parser par = { 0 };
     tokenize(&par, infile, file_basename(argv[1]));
     struct assembler compiler = { 0 };

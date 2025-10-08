@@ -8,6 +8,7 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
 # options
 
 option(AS "Build the Assembler" ON)
+option(DIS "Build the Disassembler" ON)
 set(PAGE_SIZE 4096 CACHE STRING "Default page size")
 
 include(CheckIncludeFile)
@@ -31,6 +32,10 @@ add_library(common STATIC ${COMMON_SOURCES})
 target_include_directories(common PUBLIC common/include/)
 
 
-if(${AS})
+if (${AS})
     add_subdirectory(as)
+endif()
+
+if (${DIS})
+    add_subdirectory(dis)
 endif()

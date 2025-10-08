@@ -12,6 +12,12 @@ enum encoding_type {
     XXX_OP
 };
 
+struct bare_op {
+    uint32_t opcode: 6;
+    uint32_t bits: 2;
+    uint32_t rest: 24;
+};
+
 struct math_op_00 {
     uint32_t opcode: 6;
     uint32_t bits: 2;
@@ -39,5 +45,6 @@ struct math_op_11 {
 
 uint8_t get_instr_opcode(const struct str instr);
 enum encoding_type get_instr_type(const struct str instr);
+struct str get_opcode_instr(uint8_t opcode);
 
 #endif

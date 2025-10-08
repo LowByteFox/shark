@@ -1,8 +1,9 @@
 /* SPDX-License-Identifier: Apache-2.0 */
-#include "err.h"
+#include <err.h>
 #include <config.h>
 #include <stdint.h>
 #include <stdlib.h>
+#include <file.h>
 
 #if HAVE_SYS_STAT_H && HAVE_UNISTD_H && HAVE_FCNTL_H
 #include <sys/stat.h>
@@ -14,7 +15,7 @@
 #include <libgen.h>
 #endif
 
-char *read_entire_file(const char *path)
+char *read_entire_file(const char *path, int *len)
 {
 #if HAVE_SYS_STAT_H && HAVE_UNISTD_H && HAVE_FCNTL_H
     struct stat s;
@@ -38,6 +39,9 @@ char *read_entire_file(const char *path)
         close(fd);
         return NULL;
     }
+
+    if (len != NULL)
+        *len = s.st_size;
 
     close(fd);
     return buffer;
