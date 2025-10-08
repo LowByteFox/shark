@@ -15,19 +15,19 @@ int main()
     uint32_t res;
 
     tokenize(&p, "main:\n"
-                            "  add R14, #1, #1      ; Adds 1 + 1 to R0", "<input>");
+                            "  add R0, R0, R0", "<input>");
 
-    struct ir_builder ir = parse(&p);
-    struct ir_iter i = ir_iter(&ir);
-    /* skip label */
-    ir_next(&i);
+    struct assembler compiler = { 0 };
+    assembler_init(&compiler, &p);
 
-    if ((res = assemble_instruction(&i)) != INVALID_ASSEMBLY) {
-        printf("Assembled!\n");
-        struct math_op_11 *decompiled = (void*) &res;
-        printf("%d %d %d %d %d\n", decompiled->opcode, decompiled->bits, decompiled->output_reg, decompiled->input_imm1, decompiled->input_imm2);
+    struct instructions compiled = assemble(&compiler);
+
+    for (int i = 0; i < compiled.len; i++) {
+        struct math_op_11 *decompiled = (void*) (compiled.ptr + i);
+        printf("%d %d\n", decompiled->opcode, decompiled->bits);
     }
 
+    free(compiled.ptr);
     free(p.tokens.ptr);
     return 0;
 }

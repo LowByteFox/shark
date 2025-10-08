@@ -4,11 +4,13 @@
 
 #include <loc.h>
 #include <str.h>
+#include <stdbool.h>
 
 struct diagnostics {
     struct str filename, source, line;
     struct source_loc location;
     int length;
+    bool errored;
 };
 
 struct diagnostics diag_init(struct str filename, struct str source);

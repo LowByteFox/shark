@@ -17,5 +17,6 @@ struct parser {
 
 void tokenize(struct parser *self, const char *code, const char *filename);
 struct ir_builder parse(struct parser *self);
+void parse_additional(struct parser *self, struct ir_builder *prev);
 
 #endif

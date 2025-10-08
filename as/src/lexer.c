@@ -65,6 +65,8 @@ static void lex_reg(struct lexer *l, struct token *o)
     o->type = REGISTER;
     o->offset = l->off - 1;
 
+    if (peek_char(l) == '-') next_char(l);
+
     while (isdigit(peek_char(l))) { next_char(l); }
 
     o->view = str_view(l->buffer, o->offset, l->off);

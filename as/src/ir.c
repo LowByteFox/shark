@@ -17,10 +17,11 @@ void ir_emit(struct ir_builder *builder, enum ir_type type)
     builder->current->offset = -1;
 }
 
-void ir_offset(struct ir_builder *builder, int offset)
+void ir_offset(struct ir_builder *builder, int offset, int len)
 {
     assert(builder->current != NULL && "Forgot to call `ir_emit`?");
     builder->current->offset = offset;
+    builder->current->len = len;
 }
 
 /* fill in data */

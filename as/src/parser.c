@@ -32,21 +32,27 @@ struct ir_builder parse(struct parser *self)
 {
     struct ir_builder builder;
     ir_init(&builder);
+    parse_additional(self, &builder);
 
+    return builder;
+}
+
+void parse_additional(struct parser *self, struct ir_builder *prev)
+{
     struct token *current = consume(self);
     while (current != NULL && current->type != END) {
         switch (current->type) {
         case LABEL_TOK:
-            ir_emit(&builder, IR_LABEL);
+            ir_emit(prev, IR_LABEL);
             current->view.len--; /* remove : */
-            ir_offset(&builder, current->offset);
-            ir_label(&builder, current->view);
+            ir_offset(prev, current->offset, current->view.len);
+            ir_label(prev, current->view);
             break;
         case SYMBOL:
-            ir_emit(&builder, IR_INSTR);
-            ir_offset(&builder, current->offset);
-            ir_instr(&builder, current->view);
-            emit_instr_args(self, &builder);
+            ir_emit(prev, IR_INSTR);
+            ir_offset(prev, current->offset, current->view.len);
+            ir_instr(prev, current->view);
+            emit_instr_args(self, prev);
             break;
         default:
             diag_update(&self->diag, current->offset, current->view.len);
@@ -56,8 +62,6 @@ struct ir_builder parse(struct parser *self)
 
         current = consume(self);
     }
-
-    return builder;
 }
 
 
@@ -83,7 +87,7 @@ static void emit_instr_args(struct parser *self, struct ir_builder *builder)
         consume(self);
         if (current->type == REGISTER) {
             ir_emit(builder, IR_REG);
-            ir_offset(builder, current->offset);
+            ir_offset(builder, current->offset, current->view.len);
             int reg = str_to_reg(current->view);
             if (reg < 0 || reg > 15) {
                 diag_update(&self->diag, current->offset, current->view.len);
@@ -98,9 +102,9 @@ static void emit_instr_args(struct parser *self, struct ir_builder *builder)
                     diag_warn(&self->diag, "Use SP instead\n");
             }
             ir_reg(builder, reg);
-        } else {
+        } else if (current->type == CONSTANT) {
             ir_emit(builder, IR_IMM);
-            ir_offset(builder, current->offset);
+            ir_offset(builder, current->offset, current->view.len);
             ir_imm(builder, str_to_imm(current->view));
         }
 

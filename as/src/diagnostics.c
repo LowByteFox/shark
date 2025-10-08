@@ -37,6 +37,8 @@ void diag_err(struct diagnostics *diag, const char *fmt, ...)
 
     for (int i = 0; i < diag->length; i++) fputc('~', stderr);
     fputs("\e[0m\n", stderr);
+
+    diag->errored = true;
 }
 
 void diag_warn(struct diagnostics *diag, const char *fmt, ...)
