@@ -1,33 +1,29 @@
 /* SPDX-License-Identifier: Apache-2.0 */
-#include <ir.h>
-#include <assemble.h>
-#include <encodings.h>
-#include <stdint.h>
-#include <stdio.h>
-#include <tokens.h>
+#include "assemble.h"
 #include <parser.h>
-#include <stddef.h>
+#include <err.h>
+#include <program.h>
+#include <file.h>
 #include <stdlib.h>
 
-int main()
+int main(int argc, char **argv)
 {
-    struct parser p = { 0 };
-    uint32_t res;
+    setprogname(argv[0]);
 
-    tokenize(&p, "main:\n"
-                            "  add R0, R0, R0", "<input>");
+    if (argc != 3)
+        die("Expected 3 arguments, got: %d!", argc);
 
+    char *infile = read_entire_file(argv[1]);
+    struct parser par = { 0 };
+    tokenize(&par, infile, file_basename(argv[1]));
     struct assembler compiler = { 0 };
-    assembler_init(&compiler, &p);
-
+    assembler_init(&compiler, &par);
     struct instructions compiled = assemble(&compiler);
 
-    for (int i = 0; i < compiled.len; i++) {
-        struct math_op_11 *decompiled = (void*) (compiled.ptr + i);
-        printf("%d %d\n", decompiled->opcode, decompiled->bits);
-    }
+    write_entire_file(argv[2], (void*) compiled.ptr, compiled.len * sizeof(instruction));
 
     free(compiled.ptr);
-    free(p.tokens.ptr);
+    free(par.tokens.ptr);
+    free(infile);
     return 0;
 }
