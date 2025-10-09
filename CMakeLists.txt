@@ -2,8 +2,11 @@
 cmake_minimum_required(VERSION 3.22)
 project(shark VERSION 0.1.0)
 
+# overrides
+
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
+set(FETCHCONTENT_QUIET NO)
 
 # options
 
@@ -11,6 +14,9 @@ option(AS "Build the Assembler" ON)
 option(DIS "Build the Disassembler" ON)
 option(USER_EMU "Build the Userspace Emulator" ON)
 set(PAGE_SIZE 4096 CACHE STRING "Default page size")
+set(GOOGLETEST_VERSION 1.17.0 CACHE STRING "Googletest version")
+
+# portability
 
 include(CheckIncludeFile)
 check_include_file("sys/mman.h" HAVE_SYS_MMAN_H)
@@ -32,6 +38,17 @@ file(GLOB COMMON_SOURCES common/src/*.c)
 add_library(common STATIC ${COMMON_SOURCES})
 target_include_directories(common PUBLIC common/include/)
 
+# tests
+include(CTest)
+include(FetchContent)
+
+FetchContent_Declare(
+    googletest
+    DOWNLOAD_EXTRACT_TIMESTAMP OFF
+    URL "https://github.com/google/googletest/releases/download/\
+v${GOOGLETEST_VERSION}/googletest-${GOOGLETEST_VERSION}.tar.gz"
+)
+FetchContent_MakeAvailable(googletest)
 
 if (${AS})
     add_subdirectory(as)
