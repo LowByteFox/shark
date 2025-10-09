@@ -9,6 +9,7 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
 
 option(AS "Build the Assembler" ON)
 option(DIS "Build the Disassembler" ON)
+option(USER_EMU "Build the Userspace Emulator" ON)
 set(PAGE_SIZE 4096 CACHE STRING "Default page size")
 
 include(CheckIncludeFile)
@@ -38,4 +39,8 @@ endif()
 
 if (${DIS})
     add_subdirectory(dis)
+endif()
+
+if (${USER_EMU})
+    add_subdirectory(emu/user)
 endif()
