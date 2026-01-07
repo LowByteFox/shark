@@ -8,10 +8,7 @@ target_include_directories(${PROJECT_NAME}-as PRIVATE include)
 target_link_libraries(${PROJECT_NAME}-as common)
 
 if (${BUILD_TESTING})
-    add_executable(as-lexer-test test/lexer.C ${AS_SOURCES})
+    add_executable(as-lexer-test test/lexer.c ${AS_SOURCES})
     target_include_directories(as-lexer-test PRIVATE include)
-    target_link_libraries(as-lexer-test PRIVATE GTest::gtest_main common)
-
-    include(GoogleTest)
-    gtest_discover_tests(as-lexer-test)
+    target_link_libraries(as-lexer-test PRIVATE nurse common)
 endif()

@@ -14,7 +14,6 @@ option(AS "Build the Assembler" ON)
 option(DIS "Build the Disassembler" ON)
 option(USER_EMU "Build the Userspace Emulator" ON)
 set(PAGE_SIZE 4096 CACHE STRING "Default page size")
-set(GOOGLETEST_VERSION 1.17.0 CACHE STRING "Googletest version")
 
 # portability
 
@@ -43,12 +42,12 @@ include(CTest)
 include(FetchContent)
 
 FetchContent_Declare(
-    googletest
+    nurse
     DOWNLOAD_EXTRACT_TIMESTAMP OFF
-    URL "https://github.com/google/googletest/releases/download/\
-v${GOOGLETEST_VERSION}/googletest-${GOOGLETEST_VERSION}.tar.gz"
+    GIT_REPOSITORY https://github.com/LowByteFox/nurse.git
+    GIT_TAG main
 )
-FetchContent_MakeAvailable(googletest)
+FetchContent_MakeAvailable(nurse)
 
 if (${AS})
     add_subdirectory(as)
