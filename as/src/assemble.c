@@ -24,6 +24,9 @@ void assembler_init(struct assembler *self, struct parser *parser)
 {
     self->diag = parser->diag;
     self->ir = parse(parser);
+    if (parser->diag.errored)
+        return;
+
     self->iter = ir_iter(&self->ir);
 }
 

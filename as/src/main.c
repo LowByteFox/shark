@@ -18,11 +18,15 @@ int main(int argc, char **argv)
     tokenize(&par, infile, file_basename(argv[1]));
     struct assembler compiler = { 0 };
     assembler_init(&compiler, &par);
+    if (par.diag.errored)
+        goto end;
+
     struct instructions compiled = assemble(&compiler);
 
     write_entire_file(argv[2], (void*) compiled.ptr, compiled.len * sizeof(instruction));
 
     free(compiled.ptr);
+end:
     free(par.tokens.ptr);
     free(infile);
     return 0;
